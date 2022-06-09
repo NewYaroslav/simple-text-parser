@@ -21,8 +21,10 @@ int main() {
         std::cout << "start compare_word:" << std::endl;
         std::cout << "#0 date | data: " << simple_text_parser::compare_word("date", "data", 0) << std::endl;
         std::cout << "#1 date | data: " << simple_text_parser::compare_word("date", "data", 0.1) << std::endl;
-        std::cout << "#2 botatananima | batatananime: " << simple_text_parser::compare_word("botatananima", "batatananime", 0.15) << std::endl;
-        std::cout << "#3 botatananima | banatananime: " << simple_text_parser::compare_word("botatananima", "banatananime", 0.15) << std::endl;
+        std::cout << "#2A botatananima | batatananime: " << simple_text_parser::compare_word("botatananima", "batatananime", 0.15) << std::endl;
+        std::cout << "#2B botatananima | batatananime: " << simple_text_parser::compare_word("botatananima", {"batatananime"}, {}, 0.15) << std::endl;
+        std::cout << "#3A botatananima | banatananime: " << simple_text_parser::compare_word("botatananima", "banatananime", 0.15) << std::endl;
+        std::cout << "#3B botatananima | banatananime: " << simple_text_parser::compare_word("botatananima", {"banatananime"}, {}, 0.15) << std::endl;
     }
     return 0;
 }

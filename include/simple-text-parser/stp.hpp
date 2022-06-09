@@ -101,7 +101,7 @@ namespace simple_text_parser {
         return calc_levenshtein_distance(utf8_to_vector(s), utf8_to_vector(t));
     }
 
-	bool compare_word(
+	bool compare_word_v2(
 			const std::string &src,
 			const std::vector<std::string> &dst,
 			const std::vector<std::string> no_dst,
