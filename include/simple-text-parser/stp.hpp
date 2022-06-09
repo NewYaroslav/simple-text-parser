@@ -4,14 +4,16 @@
 #include <vector>
 #include <string>
 #include "utf8.h"
+#include "parts/stp_utf8.hpp"
 
 namespace simple_text_parser {
 
 	/** \brief Разобрать строку списка
 	 * \param text 		Исходный текст
 	 * \param delimiter	Список разделителей
+	 * \return Массив слов
 	 */
-	std::vector<std::string> split(const std::string &text, const std::string &delimiter = "\t\n\r!,. ") noexcept {
+	std::vector<std::string> split(const std::string &text, const std::string &delimiter = "\t\n\r\"/!?:;',.-{}<>() ") noexcept {
 		std::vector<std::string> result;
 
 		size_t found = text.find_first_of(delimiter);
@@ -41,8 +43,8 @@ namespace simple_text_parser {
 	 * Оригинал кода: https://www.nookery.ru/hamming-distance-and-lowenstein-distance-example-implementation-in-c/
 	 */
 	size_t calc_levenshtein_distance(
-			const std::vector<std::string> &s,
-			const std::vector<std::string> &t) noexcept {
+			const std::u32string &s,
+			const std::u32string &t) noexcept {
 		const size_t n = s.size();
 		const size_t m = t.size();
 		// step 1
@@ -72,7 +74,7 @@ namespace simple_text_parser {
 		return d[n][m];
     }
 
-	std::vector<std::string> utf8_to_vector(const std::string &text) noexcept {
+	std::vector<std::string> utf8_to_str_vector(const std::string &text) noexcept {
 		if (text.empty()) return std::vector<std::string>();
 		std::vector<std::string> temp;
 
@@ -98,33 +100,33 @@ namespace simple_text_parser {
 	}
 
     size_t calc_levenshtein_distance(const std::string &s, const std::string &t) {
-        return calc_levenshtein_distance(utf8_to_vector(s), utf8_to_vector(t));
+        return calc_levenshtein_distance(utf8::utf8to32(s), utf8::utf8to32(t));
     }
 
 	bool compare_word_v2(
 			const std::string &src,
 			const std::vector<std::string> &dst,
-			const std::vector<std::string> no_dst,
+			const std::vector<std::string> &no_dst,
 			const double max_threshold = 0.15) {
-		std::vector<std::string> src_utf8 = utf8_to_vector(src);
-		std::vector<std::vector<std::string>> dst_utf8;
-		std::vector<std::vector<std::string>> no_dst_utf8;
+		std::u32string src_utf32 = utf8::utf8to32(src);
+		std::vector<std::u32string> dst_utf32;
+		std::vector<std::u32string> no_dst_utf32;
 
 		for (size_t i = 0; i < dst.size(); ++i) {
-			dst_utf8.push_back(utf8_to_vector(dst[i]));
+			dst_utf32.push_back(utf8::utf8to32(dst[i]));
 		}
 
 		for (size_t i = 0; i < no_dst.size(); ++i) {
-			no_dst_utf8.push_back(utf8_to_vector(no_dst[i]));
+			no_dst_utf32.push_back(utf8::utf8to32(no_dst[i]));
 		}
 
-		size_t min_distance = src_utf8.size();
+		size_t min_distance = src_utf32.size();
 		bool is_ok = false;
-		for (size_t i = 0; i < dst_utf8.size(); ++i) {
-			size_t max_distance = (size_t)(max_threshold * (double)dst_utf8[i].size() + 0.5d);
+		for (size_t i = 0; i < dst_utf32.size(); ++i) {
+			size_t max_distance = (size_t)(max_threshold * (double)dst_utf32[i].size() + 0.5d);
 			if (max_threshold > 0 && max_distance == 0) max_distance = 1;
 			if (max_distance < min_distance) min_distance = max_distance;
-			const size_t distance = calc_levenshtein_distance(src_utf8, dst_utf8[i]);
+			const size_t distance = calc_levenshtein_distance(src_utf32, dst_utf32[i]);
 			if (distance <= max_distance) {
 				is_ok = true;
 				break;
@@ -133,8 +135,8 @@ namespace simple_text_parser {
 
 		if (!is_ok) return false;
 
-		for (size_t i = 0; i < no_dst.size(); ++i) {
-			const size_t no_dst_distance = calc_levenshtein_distance(src_utf8, no_dst_utf8[i]);
+		for (size_t i = 0; i < no_dst_utf32.size(); ++i) {
+			const size_t no_dst_distance = calc_levenshtein_distance(src_utf32, no_dst_utf32[i]);
 			if (no_dst_distance <= min_distance) return false;
 		}
 		return true;
@@ -145,22 +147,22 @@ namespace simple_text_parser {
             const std::string &dst,
             const std::vector<std::string> &no_dst,
             const double max_threshold = 0.15) {
-		std::vector<std::string> src_utf8 = utf8_to_vector(src);
-		std::vector<std::string> dst_utf8 = utf8_to_vector(dst);
-		std::vector<std::vector<std::string>> no_dst_utf8;
+		std::u32string src_utf32 = utf8::utf8to32(src);
+		std::u32string dst_utf32 = utf8::utf8to32(dst);
+		std::vector<std::u32string> no_dst_utf32;
 
 		for (size_t i = 0; i < no_dst.size(); ++i) {
-			no_dst_utf8.push_back(utf8_to_vector(no_dst[i]));
+			no_dst_utf32.push_back(utf8::utf8to32(no_dst[i]));
 		}
 
-		size_t max_distance = (size_t)(max_threshold * (double)dst_utf8.size() + 0.5d);
+		size_t max_distance = (size_t)(max_threshold * (double)dst_utf32.size() + 0.5d);
 		if (max_threshold > 0 && max_distance == 0) max_distance = 1;
-		const size_t distance = calc_levenshtein_distance(src_utf8, dst_utf8);
+		const size_t distance = calc_levenshtein_distance(src_utf32, dst_utf32);
 
 		if (distance > max_distance) return false;
 
 		for (size_t i = 0; i < no_dst.size(); ++i) {
-			const size_t no_dst_distance = calc_levenshtein_distance(src_utf8, no_dst_utf8[i]);
+			const size_t no_dst_distance = calc_levenshtein_distance(src_utf32, no_dst_utf32[i]);
 			if (no_dst_distance <= max_distance) return false;
 		}
 		return true;
@@ -170,12 +172,12 @@ namespace simple_text_parser {
             const std::string &src,
             const std::string &dst,
             const double max_threshold = 0.15) {
-		std::vector<std::string> src_utf8 = utf8_to_vector(src);
-		std::vector<std::string> dst_utf8 = utf8_to_vector(dst);
+		std::u32string src_utf32 = utf8::utf8to32(src);
+		std::u32string dst_utf32 = utf8::utf8to32(dst);
 
-		size_t max_distance = (size_t)(max_threshold * (double)dst_utf8.size() + 0.5d);
+		size_t max_distance = (size_t)(max_threshold * (double)dst_utf32.size() + 0.5d);
 		if (max_threshold > 0 && max_distance == 0) max_distance = 1;
-		const size_t distance = calc_levenshtein_distance(src_utf8, dst_utf8);
+		const size_t distance = calc_levenshtein_distance(src_utf32, dst_utf32);
 		if (distance > max_distance) return false;
 		return true;
 	}

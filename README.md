@@ -2,6 +2,13 @@
 
 С++ Полезные функции для работы с текстом с поддержкой UTF8
 
+## Преобразование UTF8 в нижний или верхний регистр
+
+```cpp
+std::cout << simple_text_parser::utf8_to_upr_utf8(u8"Вот Это Прикол! That's funny!") << std::endl;
+std::cout << simple_text_parser::utf8_to_lwr_utf8(u8"Вот Это Прикол! That's funny!") << std::endl;
+```
+
 ## Разбиение строки на слова
 
 ```cpp

@@ -22,9 +22,14 @@
 				<Option compiler="mingw_64_7_3_0" />
 				<Compiler>
 					<Add option="-O2" />
+					<Add option="-std=c++11" />
+					<Add directory="../../include" />
+					<Add directory="../../lib/utfcpp/source" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
+					<Add directory="../../include" />
+					<Add directory="../../lib/utfcpp/source" />
 				</Linker>
 			</Target>
 		</Build>
@@ -32,6 +37,7 @@
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 		</Compiler>
+		<Unit filename="../../include/simple-text-parser/stp.hpp" />
 		<Unit filename="main.cpp" />
 		<Extensions />
 	</Project>
